@@ -16,12 +16,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from vulnerable.views import home, login, register, logout
+from vulnerable.views import home, login, register, logout, adminpanel
+from django.db import connection
+
+cursor = connection.cursor()
+cursor.execute(f"SELECT * FROM auth_user WHERE username = 'admin' AND password = 'admin'")
+success = cursor.fetchone()
+
+if not success:
+    # A02:2021 - Cryptographic Failures | CWE-259: Use of Hard-coded Password
+    # A04:2021 - Insecure Design | CWE-312: Cleartext Storage of Sensitive Information
+    cursor.execute(f"INSERT INTO auth_user (password, last_login, is_superuser, username, last_name, email, is_staff, is_active, date_joined, first_name) VALUES ('admin', '', True, 'admin', '', '', True, True, '', '')")
+cursor.close()
 
 urlpatterns = [
     path("", home, name="home"),
     path('admin/', admin.site.urls),
     path("login/", login, name="login"),
     path("register/", register, name="register"),
-    path("logout/", logout, name="logout")
+    path("logout/", logout, name="logout"),
+    path("adminpanel/", adminpanel, name="adminpanel")
 ]

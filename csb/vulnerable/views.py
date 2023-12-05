@@ -19,6 +19,7 @@ def login(request):
         password = request.POST.get("password")
 
         cursor = connection.cursor()
+        # A03:2021 - Injection | CWE-89: SQL Injection
         cursor.execute(f"SELECT * FROM auth_user WHERE username = '{username}' AND password = '{password}'")
         success = cursor.fetchall()
         cursor.close()
@@ -54,6 +55,8 @@ def register(request):
         password = request.POST.get("password")
 
         cursor = connection.cursor()
+        # A03:2021 - Injection | CWE-89: SQL Injection
+        # A04:2021 - Insecure Design | CWE-312: Cleartext Storage of Sensitive Information  
         cursor.execute(f"INSERT INTO auth_user (password, last_login, is_superuser, username, last_name, email, is_staff, is_active, date_joined, first_name) VALUES ('{password}', '', False, '{username}', '', '', False, True, '', '')")
         success = cursor.fetchone()
         cursor.close()
@@ -69,3 +72,13 @@ def logout(request):
     request.session.flush()
     return redirect("home")
 
+def adminpanel(request):
+    # A01:2021 - Broken Access Control | CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
+    # if request.user.is_superuser:
+    cursor = connection.cursor()
+
+    cursor.execute(f"SELECT * FROM auth_user")
+    users = cursor.fetchall()
+    cursor.close()
+
+    return render(request, "adminpanel.html", {"users": users})

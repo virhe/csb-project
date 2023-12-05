@@ -11,8 +11,10 @@
         <a href="/login">Login</a>
         <a href="/register">Register</a>
     {% else %}
+        {% if username == "admin" %}
+            <a href="/adminpanel">Admin Panel</a>
+        {% endif %}
         <a href="/logout">Log out</a>
-
     {% endif %}
 </body>
 </html>
