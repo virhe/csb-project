@@ -9,6 +9,8 @@
     <h1>Register</h1>
     <form method="POST" action="{% url "register" %}">
         {% csrf_token %}
+
+        <!--{{form.as_p }}-->
         
         <p>Username:</p>
         <input type="text" name="username">

@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib.auth.models import User
+# from django.contrib.auth import authenticate, login
+# from django.contrib.auth.forms import UserCreationForm
 
 
 # Create your views here.
@@ -10,31 +12,44 @@ def home(request):
 
 
 def login(request):
+    login_message = ""
     if request.method == "POST":
+        request.session["username"] = "default"
         username = request.POST.get("username")
         password = request.POST.get("password")
 
         cursor = connection.cursor()
         cursor.execute(f"SELECT * FROM auth_user WHERE username = '{username}' AND password = '{password}'")
-        success = cursor.fetchone()
+        success = cursor.fetchall()
         cursor.close()
 
+        # success = authenticate(request, username=username, password=password)
+
         if not success:
-            request.session["username"] = "default"
             return render(request, "login.html")
 
-        user = User.objects.get(username=username)
-        request.session["_auth_user_id"] = user.pk
+        # login(request, success)
+
+        request.session["_auth_user_id"] = success[0]
         request.session["username"] = username
 
         return redirect("home")
 
     else:
+        request.session["username"] = "default"
         return render(request, "login.html")
 
 
 def register(request):
     if request.method == "POST":
+        # form = UserCreationForm(request.POST)
+        # if form.is_valid():
+        #     form.save()
+        #     return redirect("login")
+        # else:
+        #     form = UserCreationForm()
+
+        request.session["username"] = "default"
         username = request.POST.get("username")
         password = request.POST.get("password")
 
@@ -46,6 +61,7 @@ def register(request):
         return render(request, "login.html")
 
     else:
+        request.session["username"] = "default"
         return render(request, "register.html")
 
 
